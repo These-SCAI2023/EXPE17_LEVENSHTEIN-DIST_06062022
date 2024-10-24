@@ -1,0 +1,14 @@
+{
+  "txt": {
+    "PP--Tesseract-BIN": {
+      "Levenshtein": 0.8751244545473241,
+      "Jaro-Winkler": 0.7872572609829908
+    }
+  },
+  "json": {
+    "spacy--spacy": {
+      "Levenshtein": 0.5843070325149884,
+      "Jaro-Winkler": 0.7396178993376427
+    }
+  }
+}

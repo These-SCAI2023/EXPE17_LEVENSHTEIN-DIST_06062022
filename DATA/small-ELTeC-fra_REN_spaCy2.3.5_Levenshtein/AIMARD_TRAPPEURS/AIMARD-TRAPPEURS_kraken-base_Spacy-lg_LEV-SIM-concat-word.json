@@ -1,0 +1,14 @@
+{
+  "txt": {
+    "PP--Kraken-base": {
+      "Levenshtein": 0.9124681839511508,
+      "Jaro-Winkler": 0.7904584110269609
+    }
+  },
+  "json": {
+    "spacy--spacy": {
+      "Levenshtein": 0.603626411221348,
+      "Jaro-Winkler": 0.8344315957042047
+    }
+  }
+}
