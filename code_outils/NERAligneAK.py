@@ -8,6 +8,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from renommage import *
+
 def lire_fichier (chemin):
    with open(chemin) as json_data:
        dist =json.load(json_data)
@@ -34,7 +36,7 @@ def save_graph_moustache(nomfich):
 def generation_graph_moustache(tab, stype, bsave=False):
     size = [1]
 
-    path_data = f"../ARTICLE_CORPUS/small-*"  ##
+    # path_data = f"../ARTICLE_CORPUS/small-*"  ##
     #
     # data_tab_krakcos = tab.query("Version == 'Kraken-base' and Dist_type == 'cosinus'")
     # liste_krakcos = data_tab_krakcos["Version"] + " " + data_tab_krakcos["Dist_type"]
@@ -93,7 +95,7 @@ def generation_graph_moustache(tab, stype, bsave=False):
 
         ## sauvegarde du graphe
         if bsave == True:
-            nomgraph = f"./test_size-{stype}-{x}.png"
+            nomgraph = f"./small-ELTeC-fr_GLobale-{stype}-{x}.png"
             save_graph_moustache(nomgraph)
 
 
@@ -114,8 +116,9 @@ def get_cosinus_ref_REN_type(chemin):
 def get_cosinus_ref_OCR_type(chemin):
     part_chemin = re.split("_", chemin)
     part_chemin1 = re.split("\.", part_chemin[-1])
-    nomsOCRs = part_chemin1[-3]
-    return nomsOCRs
+    nomsOCRs = part_chemin1[-2]
+    newnomsOCRs = nommage(nomsOCRs)
+    return newnomsOCRs
 
 
 def get_cosinus_ocr_REN_type(chemin):
@@ -152,24 +155,72 @@ Liste_global_valeur_distance = []
 liste_folder_OCR_OK = ["kraken", "TesseractFra-PNG"]
 liste_file_OCR_OK = ["kraken-base", "TesseractFra-PNG"]
 liste_config = []
-### récupération des données cosinus
-mykey = "cosinus"
-for subcorpus in glob.glob("../DATA/small-ELTeC-fra_spaCy2.3.5_cosinus/*/*/*/SIM"):
+
+mykey = "jaccard"
+for subcorpus in glob.glob("../DATA/small-ELTeC-fra_spaCy2.3.5_cosinus/*/*OCR/*/SIM"):
     # print(subcorpus)
     ## on vérifie que l'OCR est dans la liste, sinon on ne fait rien
     folder_version = get_cosinus_folder_nom_version(subcorpus)
     if folder_version in liste_folder_OCR_OK:
         ## récupération données référence
         for chemin_fichier in glob.glob("%s/*.json" % subcorpus):
-            # print(chemin_fichier)
+            print(chemin_fichier)
             # récupération version REN dans le nom du fichier
-            VersionREN = get_cosinus_ref_REN_type(chemin_fichier)
+            # VersionREN = get_cosinus_ref_REN_type(chemin_fichier)
             # récupération version OCR dans le nom du fichier
             VersionOCR = get_cosinus_ref_OCR_type(chemin_fichier)
+            # print(VersionOCR)
             # lecture du fichier json
             jsonfile = lire_fichier(chemin_fichier)
             Liste_global_version_ocr.append(VersionOCR)
-            Liste_global_REN.append(VersionREN)
+            # Liste_global_REN.append(VersionREN)
+            Liste_global_REN.append("txt")
+            Liste_global_type_distance.append(mykey)
+            liste_config.append(VersionOCR + " -- " + mykey)
+            # récupération distance cosinus
+            Liste_global_valeur_distance.append(jsonfile[mykey][0])
+
+        ## récupération données REN
+        ocrSubcorpus = subcorpus[:-3] + "NER/SIM"
+        for chemin_fichier in glob.glob("%s/*.json" % ocrSubcorpus):
+            # print(chemin_fichier)
+            # récupération version REN dans le nom du fichier
+            VersionREN = get_cosinus_ocr_REN_type(chemin_fichier)
+            # print("VersionREN :", VersionREN)
+            if VersionREN == "spacylg2.3.5":
+                # print("VersionREN :", VersionREN)
+                # récupération version OCR dans le nom du fichier
+                VersionOCR = get_cosinus_ocr_OCR_type(chemin_fichier)
+                # print("VersionOCR :", VersionOCR)
+                # lecture du fichier json
+                jsonfile = lire_fichier(chemin_fichier)
+                Liste_global_version_ocr.append(VersionOCR)
+                Liste_global_REN.append(VersionREN)
+                Liste_global_type_distance.append(mykey)
+                liste_config.append(VersionOCR + " -- " + mykey)
+                # récupération distance cosinus
+                Liste_global_valeur_distance.append(jsonfile[mykey][0])
+
+### récupération des données cosinus
+mykey = "cosinus"
+for subcorpus in glob.glob("../DATA/small-ELTeC-fra_spaCy2.3.5_cosinus/*/*OCR/*/SIM"):
+    # print(subcorpus)
+    ## on vérifie que l'OCR est dans la liste, sinon on ne fait rien
+    folder_version = get_cosinus_folder_nom_version(subcorpus)
+    if folder_version in liste_folder_OCR_OK:
+        ## récupération données référence
+        for chemin_fichier in glob.glob("%s/*.json" % subcorpus):
+            print(chemin_fichier)
+            # récupération version REN dans le nom du fichier
+            # VersionREN = get_cosinus_ref_REN_type(chemin_fichier)
+            # récupération version OCR dans le nom du fichier
+            VersionOCR = get_cosinus_ref_OCR_type(chemin_fichier)
+            # print(VersionOCR)
+            # lecture du fichier json
+            jsonfile = lire_fichier(chemin_fichier)
+            Liste_global_version_ocr.append(VersionOCR)
+            # Liste_global_REN.append(VersionREN)
+            Liste_global_REN.append("txt")
             Liste_global_type_distance.append(mykey)
             liste_config.append(VersionOCR + " -- " + mykey)
             # récupération distance cosinus
@@ -206,6 +257,7 @@ for subcorpus in glob.glob("../DATA/small-ELTeC-fra_REN_spaCy2.3.5_Levenshtein/*
         VersionOCR = get_lev_OCR_type(chemin_fichier)
         # print(VersionOCR)
         if VersionOCR in liste_file_OCR_OK:
+            VersionOCR = nommage(VersionOCR)
             ## récupération version REN dans le nom du fichier
             VersionREN = get_lev_REN_type(chemin_fichier)
             ## lecture du fichier json
@@ -245,7 +297,7 @@ data_tab=data_tab.sort_values(by = 'configuration')
 print(data_tab)
 ## création d'un dataframe pour la référence
 data_tabtxt = data_tab.query("REN == 'txt' ")
-# print(data_tabtxt)
+print(data_tabtxt)
 ## création d'un dataframe pour spacy-lg
 data_tabspacy = data_tab.query("REN != 'txt' ")
 # print(data_tabspacy)
